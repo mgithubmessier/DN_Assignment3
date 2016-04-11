@@ -1,6 +1,6 @@
 //Joe Lebedew
 //CSC390
-//asg3
+//asg3 stop and wait
 
 #include<iostream>
 
@@ -37,6 +37,8 @@ void receiveFile(int s, sockaddr_in address, int addressSize)
     {
       struct DataPacket data;
 
+      int probability = (rand() % 10 + 1);
+
       bytesRead = recvfrom(s, (void*)&data, sizeof(data), 0, (struct sockaddr*) &address, (socklen_t *) &addressSize);
 
       if (bytesRead == 0)
@@ -53,9 +55,28 @@ void receiveFile(int s, sockaddr_in address, int addressSize)
 
       if (data.sequenceNumber == sequenceNumber && data.checksum == checksum)
 	{
+	  cout<<"File segment " << sequenceNumber << " Received" << endl;
+
 	  sequenceNumber ++;
-	  sendto(s, &sequenceNumber, 4, 0, (struct sockaddr*) &address, (socklen_t) addressSize); //send ACK as the next sequence number expected
-	  cout<<"File Segment Received Successfully"<<endl;
+
+	  if (probability == 7) //simulate ACK not getting to sender
+	    {
+	      //sendto(s, &sequenceNumber, 4, 0, (struct sockaddr*) &address, (socklen_t) addressSize);
+	    }
+	  else if (probability == 8) //simulate corrupt segment
+	    {
+	      int incorrectACK = -345;
+	      sendto(s, &incorrectACK, 4, 0, (struct sockaddr*) &address, (socklen_t) addressSize);
+	    }
+	  else if (probability == 9) //simulate out of order
+	    {
+	      int incorrectACK = -345;
+	      sendto(s, &incorrectACK, 4, 0, (struct sockaddr*) &address, (socklen_t) addressSize);
+	    }
+	  else
+	    {
+	      sendto(s, &sequenceNumber, 4, 0, (struct sockaddr*) &address, (socklen_t) addressSize); //send ACK as the next sequence number expected
+	    }
 	}
       else
 	{

@@ -1,6 +1,6 @@
 //Joe Lebedew
 //CSC390
-//asg3
+//asg3 stop and wait
 
 #include<iostream>
 
@@ -71,7 +71,7 @@ void sendFile(int s, string toSend, sockaddr_in address, int addressSize)
       int probability = (rand() % 10 + 1);
       if (probability == 7) //simulate not arriving at receiver
 	{
-	  sendto(s, (void*)&data, sizeof(data), 0, (struct sockaddr*) &address, (socklen_t) addressSize);
+	  //sendto(s, (void*)&data, sizeof(data), 0, (struct sockaddr*) &address, (socklen_t) addressSize);
 	}
       else if (probability == 8) //simulate corrupted segment
 	{
@@ -88,30 +88,31 @@ void sendFile(int s, string toSend, sockaddr_in address, int addressSize)
 	  sendto(s, (void*)&data, sizeof(data), 0, (struct sockaddr*) &address, (socklen_t) addressSize);
 	}
 
-      /*
       struct timeval timeout;
-      timeout.tv_sec = 10;
-      timeout.tv_usec = 0;
-      int rv = select(s, NULL, NULL, NULL, &timeout);
-      if (rv == 0)
+      timeout.tv_sec = 0;
+      timeout.tv_usec = 100000;
+
+      if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) != 0)
 	{
-	  cout<<"TIMEOUT Waiting for ACK, resending"<<endl;
+	  cout<<"error creating recvfrom timeout"<<endl;
+	}
+
+      int bytesReceived = recvfrom(s, &ACKorNACK, 4, 0, (struct sockaddr*) &address, (socklen_t*) &addressSize);
+      
+      if (bytesReceived >= 0 && ACKorNACK == (sequenceNumber+1))
+	{
+	  cout<<"File Segment " << sequenceNumber << " Sent Successfully"<<endl;
+	  sequenceNumber++;
+	  sizeOfInputFile = read(inputFile, &buffer, BUFFERSIZE);
+	}
+      else if (bytesReceived < 0)
+	{
+	  cout<<"Timeout reached trying to send segment " << sequenceNumber << ", trying to resend"<<endl;
 	}
       else
-      {*/
-	  recvfrom(s, &ACKorNACK, 4, 0, (struct sockaddr*) &address, (socklen_t*) &addressSize);
-	  
-	  if (ACKorNACK == (sequenceNumber+1))
-	    {
-	      cout<<"File Segment " << sequenceNumber << " Sent Successfully"<<endl;
-	      sequenceNumber++;
-	      sizeOfInputFile = read(inputFile, &buffer, BUFFERSIZE);
-	    }
-	  else
-	    {
-	      cout<<"File Segment " << sequenceNumber << " Failed to Send, trying again"<<endl;
-	    }
-	  //}
+	{
+	  cout<<"File Segment " << sequenceNumber << " Failed to Send, trying again"<<endl;
+	}
     }
   sendto(s, 0, 0, 0, (struct sockaddr*) &address, (socklen_t) addressSize); //after sending file to the receiver, send nothing to signal end of file
 
