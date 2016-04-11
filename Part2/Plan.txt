@@ -1,0 +1,2 @@
+Window of size 4
+Send data in sequence
