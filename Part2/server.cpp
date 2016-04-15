@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         exit(-1);
     }
     
-    receiveFile(s, address);
+    receiveFile(s ,address);
 
     close(s);
   

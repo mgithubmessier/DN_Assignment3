@@ -1,2 +1,24 @@
-Window of size 4
-Send data in sequence
+timeouts
+	sender.cpp
+		sending a window
+			loop a loop through an array of packets, until file is empty 
+				send a packet over to the receiver
+				receive an ack
+					on a successful ack, mark the packet as written
+					on a corrupt ack, resend the same packet immediately
+					timed out ack, mark their current index in the window in an array of integers
+				every divisible by 9 sends, iterate through the timed out array and resend any packets found
+		timeouts
+			send a timeout packet
+			send another x packets; the program then "realizes" the timeout packet's ack is missing
+			keep track of the number of packets following the lack of an ack with an array of integers containing the address in the window of the ack
+			print "there was a timeout on packet"
+			send the packet again
+		out of order
+			swap the current packet in the window array with its next one, if last one, swap it with the first one 
+			then continue sending packets in the array linearly
+	receiver.cpp
+		timeouts
+			receive pseduo timeout packet, then do not respond
+			handle it when it does come as it would with an "out of order" packet
+

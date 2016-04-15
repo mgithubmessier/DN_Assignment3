@@ -7,6 +7,13 @@ public:
   char buffer[BUFFER_SIZE];
   int sequenceNumber;
   unsigned int checksum;
-  void computeChecksum();
-  void print();
+  int computeChecksum();
+  void print(string message);
+  const char* stringToCharBuffer(string zString);
+  DataPacket getCorruptPacket();
+  DataPacket getNotArrivePacket();
+  DataPacket getEndPacket();
+  bool sent = false;
+  bool written = false;
 };
+string intToString(int i);
